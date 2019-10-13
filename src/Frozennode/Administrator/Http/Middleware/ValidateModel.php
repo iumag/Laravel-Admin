@@ -32,7 +32,7 @@ class ValidateModel
      *
      * @param \Illuminate\Http\Request $request
      */
-    protected function resolveDynamicFormRequestErrors(Request $request)
+    protected function resolveDynamicFormRequestErrors($request)
     {
         try {
             $config = app('itemconfig');
