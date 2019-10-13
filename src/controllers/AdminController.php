@@ -42,8 +42,6 @@ class AdminController extends Controller {
 	{
 		$this->request = $request;
 		$this->session = $session;
-		
-		$this->formRequestErrors = $this->resolveDynamicFormRequestErrors($request);
 
 		if ( ! \is_null($this->layout))
 		{
@@ -639,40 +637,5 @@ class AdminController extends Controller {
 		}
 
 		return redirect()->back();
-	}
-
-	/**
-	 * POST method to capture any form request errors
-	 *
-	 * @param \Illuminate\Http\Request $request
-	 */
-	protected function resolveDynamicFormRequestErrors(Request $request)
-	{
-		try {
-			$config = app('itemconfig');
-			$fieldFactory = app('admin_field_factory');
-		} catch (\ReflectionException $e) {
-			return null;
-		}
-		if (array_key_exists('form_request', $config->getOptions())) {
-			try {
-				$model = $config->getFilledDataModel($request, $fieldFactory->getEditFields(), $request->id);
-
-				$request->merge($model->toArray());
-				$formRequestClass = $config->getOption('form_request');
-				app($formRequestClass);
-			} catch (HttpResponseException $e) {
-				//Parses the exceptions thrown by Illuminate\Foundation\Http\FormRequest
-				$errorMessages = $e->getResponse()->getContent();
-				$errorsArray = json_decode($errorMessages);
-				if (!$errorsArray && \is_string ( $errorMessages )) {
-					return $errorMessages;
-				}
-				if ($errorsArray) {
-					return implode(".", array_dot($errorsArray));
-				}
-			}
-		}
-		return null;
 	}
 }
